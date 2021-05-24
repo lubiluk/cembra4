@@ -2,12 +2,11 @@ import gym
 import panda_gym
 
 from stable_baselines3 import HER
-from stable_baselines3.sac import MlpPolicy
-from sb3_contrib.common.wrappers.time_feature import TimeFeatureWrapper
+from wrappers import DoneOnSuccessWrapper
 
-env = TimeFeatureWrapper(gym.make('PandaReach-v2', render=True))
+env = DoneOnSuccessWrapper(gym.make('PandaPush-v1', render=True))
 
-model = HER.load("data/fetch_push_sb", env=env)
+model = HER.load("data/push_sb_best/best_model", env=env)
 
 obs = env.reset()
 for _ in range(1000):
