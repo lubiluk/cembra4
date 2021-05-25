@@ -1,13 +1,14 @@
 import gym
 import panda_gym
 from wrappers import DoneOnSuccessWrapper
+import cv2
 
-env = DoneOnSuccessWrapper(gym.make('PandaReach-v1', render=True))
+env = DoneOnSuccessWrapper(gym.make("PandaReachCam-v1", render=True))
 
 obs = env.reset()
 done = False
-while not done:
-    action = env.action_space.sample() # random action
+while True:
+    action = env.action_space.sample()  # random action
     obs, reward, done, info = env.step(action)
 
 env.close()

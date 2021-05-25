@@ -6,12 +6,13 @@ import torch.nn as nn
 
 from stable_baselines3 import HER, SAC
 from stable_baselines3.sac import MlpPolicy
+from wrappers import DoneOnSuccessWrapper
 
 th.backends.cudnn.benchmark = True
 th.autograd.set_detect_anomaly(False)
 th.autograd.profiler.profile(enabled=False)
 
-env = gym.make('PandaReach-v1', render=False)
+env = DoneOnSuccessWrapper(gym.make('PandaReach-v1', render=False))
 
 policy_kwargs = dict(
     activation_fn=th.nn.ReLU,
@@ -36,6 +37,6 @@ model = HER(
     policy_kwargs=policy_kwargs
 )
 
-model.learn(total_timesteps=30000)
+model.learn(total_timesteps=1_000_000)
 model.save("data/reach_sb")
 
