@@ -6,7 +6,7 @@ from wrappers import DoneOnSuccessWrapper
 
 env = DoneOnSuccessWrapper(gym.make('PandaPush-v1', render=True))
 
-model = HER.load("data/push_sb_best/best_model", env=env)
+model = HER.load("trained/push_sb", env=env)
 
 obs = env.reset()
 for _ in range(1000):
