@@ -1,3 +1,4 @@
+from operator import mod
 import gym
 import panda_gym
 from wrappers import DoneOnSuccessWrapper
@@ -9,5 +10,6 @@ done = False
 while True:
     action = env.action_space.sample()  # random action
     obs, reward, done, info = env.step(action)
+    env.render()
 
 env.close()
