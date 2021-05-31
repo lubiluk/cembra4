@@ -9,8 +9,8 @@ from stable_baselines3.sac import MlpPolicy
 from pathlib import Path
 from wrappers import DoneOnSuccessWrapper
 
-DST_HDF = "S:/collect_reach_sb.hdf5"
-DST_DIR = "S:/collect_reach_sb"
+DST_HDF = "data/collect_push_sb.hdf5"
+DST_DIR = "data/collect_push_sb"
 dir = Path(DST_DIR)
 dir.mkdir(exist_ok=True)
 # Clear old data from dir if exists
@@ -36,11 +36,23 @@ class Wrapper(gym.ObservationWrapper):
             )
         )
         img_dim = env.observation_space["observation"]["camera"].shape
+        depth_dim = env.observation_space["observation"]["depth"].shape
+        gimg_dim = env.observation_space["observation"]["goal_camera"].shape
+        gdepth_dim = env.observation_space["observation"]["goal_depth"].shape
         lin_dim = env.observation_space["observation"]["observation"].shape
         act_dim = env.action_space.shape
         self.file = h5py.File(DST_HDF, "w")
         self.img_dset = self.file.create_dataset(
             "camera", combined_shape(N, img_dim), dtype="uint8"
+        )
+        self.depth_dset = self.file.create_dataset(
+            "depth", combined_shape(N, depth_dim), dtype="float32"
+        )
+        self.gimg_dset = self.file.create_dataset(
+            "goal_camera", combined_shape(N, gimg_dim), dtype="uint8"
+        )
+        self.gdepth_dset = self.file.create_dataset(
+            "goal_depth", combined_shape(N, gdepth_dim), dtype="float32"
         )
         self.lin_dset = self.file.create_dataset(
             "observation", combined_shape(N, lin_dim), dtype="f"
@@ -62,9 +74,15 @@ class Wrapper(gym.ObservationWrapper):
     def observation(self, obs):
         lin = obs["observation"]["observation"]
         img = obs["observation"]["camera"]
+        gimg = obs["observation"]["goal_camera"]
+        depth = obs["observation"]["depth"]
+        gdepth = obs["observation"]["goal_depth"]
 
         if self.dset_ptr < N: # Prevent saving last observation unnecesarily
             self.img_dset[self.dset_ptr] = img
+            self.gimg_dset[self.dset_ptr] = gimg
+            self.depth_dset[self.dset_ptr] = depth
+            self.gdepth_dset[self.dset_ptr] = gdepth
             self.lin_dset[self.dset_ptr] = lin
 
         obs["observation"] = lin
@@ -81,15 +99,14 @@ class Wrapper(gym.ObservationWrapper):
         return self.observation(observation), reward, done, info
 
 
-env = Wrapper(DoneOnSuccessWrapper(gym.make("PandaReachCam-v1", render=True)))
+env = Wrapper(DoneOnSuccessWrapper(gym.make("PandaPushCam-v1", render=True)))
 
-model = HER.load("data/reach_sb", env=env)
+model = HER.load("trained/push_sb", env=env)
 
 obs = env.reset()
 for _ in range(N):
     action, _ = model.predict(obs, deterministic=True)
     obs, reward, done, _ = env.step(action)
-    env.render()
 
     if done:
         obs = env.reset()
