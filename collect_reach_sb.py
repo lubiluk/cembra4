@@ -9,14 +9,14 @@ from stable_baselines3.sac import MlpPolicy
 from pathlib import Path
 from wrappers import DoneOnSuccessWrapper
 
-DST_HDF = "S:/collect_reach_sb.hdf5"
-DST_DIR = "S:/collect_reach_sb"
+DST_HDF = "S:/collect_reach_sb_test.hdf5"
+DST_DIR = "S:/collect_reach_sb_test"
 dir = Path(DST_DIR)
 dir.mkdir(exist_ok=True)
 # Clear old data from dir if exists
 for child in dir.glob("*"):
     child.unlink()
-N = 10_000
+N = 1_000
 
 
 def combined_shape(length, shape=None):
@@ -83,13 +83,12 @@ class Wrapper(gym.ObservationWrapper):
 
 env = Wrapper(DoneOnSuccessWrapper(gym.make("PandaReachCam-v1", render=True)))
 
-model = HER.load("data/reach_sb", env=env)
+model = HER.load("trained/reach_sb", env=env)
 
 obs = env.reset()
 for _ in range(N):
     action, _ = model.predict(obs, deterministic=True)
     obs, reward, done, _ = env.step(action)
-    env.render()
 
     if done:
         obs = env.reset()
