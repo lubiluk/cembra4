@@ -9,8 +9,8 @@ from stable_baselines3.sac import MlpPolicy
 from pathlib import Path
 from wrappers import DoneOnSuccessWrapper
 
-DST_HDF = "S:/collect_reach_sb_test.hdf5"
-DST_DIR = "S:/collect_reach_sb_test"
+DST_HDF = "S:/collect_reach_test_sb.hdf5"
+DST_DIR = "S:/collect_reach_test_sb"
 dir = Path(DST_DIR)
 dir.mkdir(exist_ok=True)
 # Clear old data from dir if exists
@@ -36,11 +36,15 @@ class Wrapper(gym.ObservationWrapper):
             )
         )
         img_dim = env.observation_space["observation"]["camera"].shape
+        depth_dim = env.observation_space["observation"]["depth"].shape
         lin_dim = env.observation_space["observation"]["observation"].shape
         act_dim = env.action_space.shape
         self.file = h5py.File(DST_HDF, "w")
         self.img_dset = self.file.create_dataset(
             "camera", combined_shape(N, img_dim), dtype="uint8"
+        )
+        self.depth_dset = self.file.create_dataset(
+            "depth", combined_shape(N, depth_dim), dtype="float32"
         )
         self.lin_dset = self.file.create_dataset(
             "observation", combined_shape(N, lin_dim), dtype="f"
@@ -62,9 +66,11 @@ class Wrapper(gym.ObservationWrapper):
     def observation(self, obs):
         lin = obs["observation"]["observation"]
         img = obs["observation"]["camera"]
+        depth = obs["observation"]["depth"]
 
         if self.dset_ptr < N: # Prevent saving last observation unnecesarily
             self.img_dset[self.dset_ptr] = img
+            self.depth_dset[self.dset_ptr] = depth
             self.lin_dset[self.dset_ptr] = lin
 
         obs["observation"] = lin

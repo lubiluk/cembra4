@@ -17,8 +17,8 @@ torch.backends.cudnn.benchmark = True
 torch.autograd.set_detect_anomaly(False)
 torch.autograd.profiler.profile(enabled=False)
 
-save_path = "./data/reach_cam_su"
-exp_name = "reach_cam_su"
+save_path = "./data/reach_depth_su"
+exp_name = "reach_depth_su"
 
 
 class PreprocessingWrapper(gym.ObservationWrapper):
@@ -52,7 +52,7 @@ class PreprocessingWrapper(gym.ObservationWrapper):
         self.transform = transforms.Compose(
             [
                 transforms.ToPILImage(),
-                transforms.Grayscale(),
+                # transforms.Grayscale(),
                 transforms.ToTensor(),
                 transforms.Normalize((0.5,), (0.5,)),
             ]
@@ -62,7 +62,7 @@ class PreprocessingWrapper(gym.ObservationWrapper):
         """what happens to each observation"""
 
         # Convert image to grayscale
-        img = obs["observation"]["camera"]
+        img = obs["observation"]["depth"]
 
         obs["observation"]["camera"] = self.transform(img)
         obs["observation"]["robot_state"] = obs["observation"]["observation"]
