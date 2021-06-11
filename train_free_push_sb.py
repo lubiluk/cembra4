@@ -18,8 +18,8 @@ th.autograd.set_detect_anomaly(False)
 th.autograd.profiler.profile(enabled=False)
 
 log_dir = "./data/push_sb_log"
-save_path = "./data/push_sb"
-best_save_path = "./data/push_sb_best"
+save_path = "./data/free_push_sb"
+best_save_path = "./data/free_push_sb_best"
 
 os.makedirs(log_dir, exist_ok=True)
 
