@@ -17,7 +17,7 @@ th.backends.cudnn.benchmark = True
 th.autograd.set_detect_anomaly(False)
 th.autograd.profiler.profile(enabled=False)
 
-log_dir = "./data/push_sb_log"
+log_dir = "./data/free_push_sb_log"
 save_path = "./data/free_push_sb"
 best_save_path = "./data/free_push_sb_best"
 
@@ -39,6 +39,7 @@ model = HER(
     env,
     SAC,
     verbose=1,
+    max_episode_length=200,
     online_sampling=False,
     buffer_size=1_000_000,
     batch_size=256,
