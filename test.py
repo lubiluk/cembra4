@@ -3,7 +3,7 @@ import gym
 import panda_gym
 from wrappers import DoneOnSuccessWrapper
 
-env = DoneOnSuccessWrapper(gym.make("PandaPushCam-v1", render=True))
+env = DoneOnSuccessWrapper(gym.make("FreePandaPush-v1", render=True))
 
 obs = env.reset()
 done = False
