@@ -5,9 +5,9 @@ from stable_baselines3 import HER, SAC
 from stable_baselines3.sac import MlpPolicy
 from wrappers import DoneOnSuccessWrapper
 
-env =  DoneOnSuccessWrapper(gym.make("FreePandaPush-v1", render=True))
+env =  DoneOnSuccessWrapper(gym.make("FreePandaPush-v1", render=True, object_shape="cube"))
 
-model = HER.load("data/push_sb_best/best_model", env=env)
+model = HER.load("data/free_push_cube_sb", env=env)
 
 obs = env.reset()
 for _ in range(10000):

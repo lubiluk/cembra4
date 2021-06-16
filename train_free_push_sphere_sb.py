@@ -17,14 +17,14 @@ th.backends.cudnn.benchmark = True
 th.autograd.set_detect_anomaly(False)
 th.autograd.profiler.profile(enabled=False)
 
-log_dir = "./data/free_push_sb_log"
-save_path = "./data/free_push_sb"
-best_save_path = "./data/free_push_sb_best"
+log_dir = "./data/free_push_sphere_sb_log"
+save_path = "./data/free_push_sphere_sb"
+best_save_path = "./data/free_push_sphere_sb_best"
 
 os.makedirs(log_dir, exist_ok=True)
 
 def make_env():
-    return DoneOnSuccessWrapper(gym.make('FreePandaPush-v1', render=False))
+    return DoneOnSuccessWrapper(gym.make('FreePandaPush-v1', render=False, object_shape="sphere"))
 
 env = make_env()
 eval_env = ObsDictWrapper(DummyVecEnv([make_env]))
