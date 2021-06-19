@@ -17,6 +17,7 @@ class ReplayBuffer:
         n_sampled_goal=1,
         goal_selection_strategy="final",
         device=None,
+        preloader=None
     ):
         self.env = env
         self.n_sampled_goal = n_sampled_goal
@@ -62,6 +63,18 @@ class ReplayBuffer:
         self.info_buf = np.empty((size, 1), dtype=object)
         self.ptr, self.size, self.max_size = 0, 0, size
         self.ep_start_ptr = self.ptr
+
+        if not preloader:
+            return
+
+        experience = preloader()
+        for (obs, action, reward, next_obs, done, info) in experience:
+            self.store(obs, action, reward, next_obs, done, info)
+            if done:
+                self.end_episode()
+                self.start_episode()
+
+
 
     def store(self, obs, act, rew, next_obs, done, info):
         obs_camera = obs["observation"]["camera"]

@@ -31,7 +31,7 @@ eval_env = ObsDictWrapper(DummyVecEnv([make_env]))
 
 policy_kwargs = dict(
     activation_fn=th.nn.ReLU,
-    net_arch=[128, 128],
+    net_arch=[64, 64, 64],
 )
 
 model = HER(
@@ -43,7 +43,7 @@ model = HER(
     online_sampling=False,
     buffer_size=1_000_000,
     batch_size=256,
-    learning_rate=0.001,
+    learning_rate=0.0003,
     learning_starts=1000,
     gamma=0.95,
     ent_coef='auto',

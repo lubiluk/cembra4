@@ -1,13 +1,14 @@
 import os
 
 import gym
-import panda_gym
+import h5py
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 
+import panda_gym
 from algos import SAC
 from algos.common import replay_buffer_her_cam
 from algos.sac import core_her_cam_goal
@@ -19,6 +20,7 @@ torch.autograd.profiler.profile(enabled=False)
 
 save_path = "./data/push_cam_su"
 exp_name = "push_cam_su"
+demonstrations_path = "S:/collect_push_sb.hdf5"
 
 
 class PreprocessingWrapper(gym.ObservationWrapper):
@@ -101,6 +103,58 @@ class Extractor(nn.Module):
 
 
 if __name__ == "__main__":
+
+    def preload():
+        # Load demonstrations
+        with h5py.File(demonstrations_path, "r") as f:
+            with torch.no_grad():
+                t = transforms.Compose(
+                    [
+                        transforms.ToPILImage(),
+                        transforms.Grayscale(),
+                        transforms.ToTensor(),
+                        transforms.Normalize((0.5,), (0.5,)),
+                    ]
+                )
+
+                N = len(f["action"])
+
+                for i in range(N):
+                    robot_state = f["observation"][i][:6]
+                    img = f["camera"][i]
+                    gimg = f["goal_camera"][i]
+                    camera = torch.cat((t(img), t(gimg)), dim=0)
+                    action = f["action"][i]
+                    reward = f["reward"][i]
+                    done = f["done"][i]
+                    desired_goal = (0, 0, 0)
+                    achieved_goal = (0, 0, 0)
+
+                    obs = {
+                        "observation": {"camera": camera, "robot_state": robot_state},
+                        "achieved_goal": achieved_goal,
+                        "desired_goal": desired_goal,
+                    }
+
+                    if i == N - 1:
+                        next_robot_state = robot_state.copy()
+                        next_camera = torch.clone(camera)
+                    else:
+                        next_robot_state = robot_state = f["observation"][i+1][:6]
+                        next_img = f["camera"][i+1]
+                        next_gimg = f["goal_camera"][i+1]
+                        next_camera = torch.cat((t(next_img), t(next_gimg)), dim=0)
+
+                    next_obs = {
+                        "observation": {"camera": next_camera, "robot_state": next_robot_state},
+                        "achieved_goal": achieved_goal,
+                        "desired_goal": desired_goal,
+                    }
+
+                    info = {}
+
+                    yield (obs, action, reward, next_obs, done, info)
+
     os.makedirs(save_path, exist_ok=True)
 
     env = PreprocessingWrapper(DoneOnSuccessWrapper(gym.make("PandaPushCam-v1")))
@@ -108,7 +162,12 @@ if __name__ == "__main__":
     ac_kwargs = dict(
         hidden_sizes=[256, 256], activation=nn.ReLU, extractor_module=Extractor
     )
-    rb_kwargs = dict(size=5_000, n_sampled_goal=4, goal_selection_strategy="future")
+    rb_kwargs = dict(
+        size=5_000,
+        n_sampled_goal=4,
+        goal_selection_strategy="future",
+        preloader=preload,
+    )
 
     logger_kwargs = dict(output_dir=save_path, exp_name=exp_name)
 
