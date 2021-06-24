@@ -29,7 +29,7 @@ class PreprocessingWrapper(gym.ObservationWrapper):
     def __init__(self, env):
         super(PreprocessingWrapper, self).__init__(env)
 
-        self.img_size = (1, 100, 100)
+        self.img_size = (2, 100, 100)
 
         obs_spaces = dict(
             camera=gym.spaces.Box(
@@ -62,9 +62,12 @@ class PreprocessingWrapper(gym.ObservationWrapper):
         """what happens to each observation"""
 
         # Convert image to grayscale
-        img = obs["observation"]["camera"]
+        img1 = obs["observation"]["camera1"]
+        img2 = obs["observation"]["camera2"]
 
-        obs["observation"]["camera"] = self.transform(img)
+        obs["observation"]["camera"] = torch.cat(
+            (self.transform(img1), self.transform(img2)), dim=0
+        )
         obs["observation"]["robot_state"] = obs["observation"]["observation"]
 
         return obs
