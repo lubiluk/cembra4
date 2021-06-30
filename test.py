@@ -4,7 +4,7 @@ import panda_gym
 from wrappers import DoneOnSuccessWrapper
 import cv2
 
-env = DoneOnSuccessWrapper(gym.make("PandaReachCam-v1", render=True))
+env = DoneOnSuccessWrapper(gym.make("PandaPushCam-v1", render=True))
 
 obs = env.reset()
 done = False
