@@ -70,9 +70,11 @@ class ReplayBuffer:
         experience = preloader()
         for (obs, action, reward, next_obs, done, info) in experience:
             self.store(obs, action, reward, next_obs, done, info)
-            if done:
-                self.end_episode()
-                self.start_episode()
+            if self.size == self.max_size - 1:
+                break
+            # if done:
+            #     self.end_episode()
+            #     self.start_episode()
 
 
 

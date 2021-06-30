@@ -8,21 +8,28 @@ from stable_baselines import PPO2
 from wrappers import DoneOnSuccessWrapper
 from gym.wrappers.flatten_observation import FlattenObservation
 
+# from gym.wrappers.filter_observation import FilterObservation
+from gym.wrappers.time_limit import TimeLimit
+
 SAVE_PATH = "./data/push_sb"
 
+
 def wrap(env):
-    return FlattenObservation(DoneOnSuccessWrapper(env))
+    return FlattenObservation(
+        DoneOnSuccessWrapper(TimeLimit(env, max_episode_steps=50), reward_offset=0)
+    )
+
 
 # multiprocess environment
 env = make_vec_env(
     "PandaPush-v1",
-    n_envs=4,
+    n_envs=32,
     wrapper_class=wrap,
     env_kwargs={"render": False},
 )
 
 model = PPO2(MlpLnLstmPolicy, env, verbose=1)
-model.learn(total_timesteps=3_000_000)
+model.learn(total_timesteps=1_000_000)
 model.save(SAVE_PATH)
 
 
