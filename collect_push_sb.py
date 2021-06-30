@@ -9,8 +9,8 @@ from stable_baselines3.sac import MlpPolicy
 from pathlib import Path
 from wrappers import DoneOnSuccessWrapper
 
-DST_HDF = "data/collect_push_sb.hdf5"
-DST_DIR = "data/collect_push_sb"
+DST_HDF = "S:/collect_push_sb.hdf5"
+DST_DIR = "S:/collect_push_sb"
 dir = Path(DST_DIR)
 dir.mkdir(exist_ok=True)
 # Clear old data from dir if exists
@@ -30,32 +30,52 @@ class Wrapper(gym.ObservationWrapper):
         super().__init__(env)
         self.observation_space = spaces.Dict(
             dict(
-                observation=env.observation_space["observation"]["observation"],
+                observation=env.observation_space["observation"]["full_observation"],
                 desired_goal=env.observation_space["desired_goal"],
                 achieved_goal=env.observation_space["achieved_goal"],
             )
         )
-        img_dim = env.observation_space["observation"]["camera"].shape
-        depth_dim = env.observation_space["observation"]["depth"].shape
-        gimg_dim = env.observation_space["observation"]["goal_camera"].shape
-        gdepth_dim = env.observation_space["observation"]["goal_depth"].shape
-        lin_dim = env.observation_space["observation"]["observation"].shape
+        img1_dim = env.observation_space["observation"]["camera1"].shape
+        img2_dim = env.observation_space["observation"]["camera2"].shape
+        depth1_dim = env.observation_space["observation"]["depth1"].shape
+        depth2_dim = env.observation_space["observation"]["depth2"].shape
+        gimg1_dim = env.observation_space["observation"]["goal_camera1"].shape
+        gimg2_dim = env.observation_space["observation"]["goal_camera2"].shape
+        gdepth1_dim = env.observation_space["observation"]["goal_depth1"].shape
+        gdepth2_dim = env.observation_space["observation"]["goal_depth2"].shape
+        lin_dim = env.observation_space["observation"]["robot_state"].shape
+        full_dim = env.observation_space["observation"]["full_observation"].shape
         act_dim = env.action_space.shape
         self.file = h5py.File(DST_HDF, "w")
-        self.img_dset = self.file.create_dataset(
-            "camera", combined_shape(N, img_dim), dtype="uint8"
+        self.img1_dset = self.file.create_dataset(
+            "camera1", combined_shape(N, img1_dim), dtype="uint8"
         )
-        self.depth_dset = self.file.create_dataset(
-            "depth", combined_shape(N, depth_dim), dtype="float32"
+        self.img2_dset = self.file.create_dataset(
+            "camera2", combined_shape(N, img2_dim), dtype="uint8"
         )
-        self.gimg_dset = self.file.create_dataset(
-            "goal_camera", combined_shape(N, gimg_dim), dtype="uint8"
+        self.depth1_dset = self.file.create_dataset(
+            "depth1", combined_shape(N, depth1_dim), dtype="float32"
         )
-        self.gdepth_dset = self.file.create_dataset(
-            "goal_depth", combined_shape(N, gdepth_dim), dtype="float32"
+        self.depth2_dset = self.file.create_dataset(
+            "depth2", combined_shape(N, depth2_dim), dtype="float32"
+        )
+        self.gimg1_dset = self.file.create_dataset(
+            "goal_camera1", combined_shape(N, gimg1_dim), dtype="uint8"
+        )
+        self.gimg2_dset = self.file.create_dataset(
+            "goal_camera2", combined_shape(N, gimg2_dim), dtype="uint8"
+        )
+        self.gdepth1_dset = self.file.create_dataset(
+            "goal_depth1", combined_shape(N, gdepth1_dim), dtype="float32"
+        )
+        self.gdepth2_dset = self.file.create_dataset(
+            "goal_depth2", combined_shape(N, gdepth2_dim), dtype="float32"
         )
         self.lin_dset = self.file.create_dataset(
-            "observation", combined_shape(N, lin_dim), dtype="f"
+            "robot_state", combined_shape(N, lin_dim), dtype="f"
+        )
+        self.full_dset = self.file.create_dataset(
+            "full_observation", combined_shape(N, full_dim), dtype="f"
         )
         self.act_dset = self.file.create_dataset(
             "action", combined_shape(N, act_dim), dtype="f"
@@ -72,20 +92,30 @@ class Wrapper(gym.ObservationWrapper):
         self.file.close()
 
     def observation(self, obs):
-        lin = obs["observation"]["observation"]
-        img = obs["observation"]["camera"]
-        gimg = obs["observation"]["goal_camera"]
-        depth = obs["observation"]["depth"]
-        gdepth = obs["observation"]["goal_depth"]
+        lin = obs["observation"]["robot_state"]
+        full = obs["observation"]["full_observation"]
+        img1 = obs["observation"]["camera1"]
+        img2 = obs["observation"]["camera2"]
+        gimg1 = obs["observation"]["goal_camera1"]
+        gimg2 = obs["observation"]["goal_camera2"]
+        depth1 = obs["observation"]["depth1"]
+        depth2 = obs["observation"]["depth2"]
+        gdepth1 = obs["observation"]["goal_depth1"]
+        gdepth2 = obs["observation"]["goal_depth2"]
 
         if self.dset_ptr < N: # Prevent saving last observation unnecesarily
-            self.img_dset[self.dset_ptr] = img
-            self.gimg_dset[self.dset_ptr] = gimg
-            self.depth_dset[self.dset_ptr] = depth
-            self.gdepth_dset[self.dset_ptr] = gdepth
+            self.img1_dset[self.dset_ptr] = img1
+            self.img2_dset[self.dset_ptr] = img2
+            self.gimg1_dset[self.dset_ptr] = gimg1
+            self.gimg2_dset[self.dset_ptr] = gimg2
+            self.depth1_dset[self.dset_ptr] = depth1
+            self.depth2_dset[self.dset_ptr] = depth2
+            self.gdepth1_dset[self.dset_ptr] = gdepth1
+            self.gdepth2_dset[self.dset_ptr] = gdepth2
             self.lin_dset[self.dset_ptr] = lin
+            self.full_dset[self.dset_ptr] = full
 
-        obs["observation"] = lin
+        obs["observation"] = obs["observation"]["full_observation"]
         return obs
 
     def step(self, action):
