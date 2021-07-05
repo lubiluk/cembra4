@@ -18,8 +18,8 @@ torch.backends.cudnn.benchmark = True
 torch.autograd.set_detect_anomaly(False)
 torch.autograd.profiler.profile(enabled=False)
 
-save_path = "./data/push_cam_su"
-exp_name = "push_cam_su"
+save_path = "./data/push_cam_su_selective"
+exp_name = "push_cam_su_selective"
 
 
 class PreprocessingWrapper(gym.ObservationWrapper):
@@ -110,9 +110,10 @@ if __name__ == "__main__":
         hidden_sizes=[256, 256], activation=nn.ReLU, extractor_module=Extractor
     )
     rb_kwargs = dict(
-        size=5_000,
+        size=50_000,
         n_sampled_goal=4,
         goal_selection_strategy="future",
+        selective=True
     )
 
     logger_kwargs = dict(output_dir=save_path, exp_name=exp_name)
@@ -123,14 +124,15 @@ if __name__ == "__main__":
         ac_kwargs=ac_kwargs,
         replay_buffer=replay_buffer_her_cam.ReplayBuffer,
         rb_kwargs=rb_kwargs,
-        max_ep_len=100,
+        max_ep_len=50,
         batch_size=256,
         gamma=0.95,
-        lr=0.00003,
+        lr=0.0003,
         update_after=512,
         update_every=512,
         logger_kwargs=logger_kwargs,
-        use_gpu_buffer=True,
+        use_gpu_buffer=False,
+        use_gpu_computation=False
     )
 
     model.train(steps_per_epoch=1024, epochs=5000)

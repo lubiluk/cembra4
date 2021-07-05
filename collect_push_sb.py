@@ -129,7 +129,7 @@ class Wrapper(gym.ObservationWrapper):
         return self.observation(observation), reward, done, info
 
 
-env = Wrapper(DoneOnSuccessWrapper(gym.make("PandaPushCam-v1", render=True)))
+env = Wrapper(DoneOnSuccessWrapper(gym.make("PandaPushCam-v1", render=False)))
 
 model = HER.load("trained/push_sb", env=env)
 

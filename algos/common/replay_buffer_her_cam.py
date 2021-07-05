@@ -17,12 +17,14 @@ class ReplayBuffer:
         n_sampled_goal=1,
         goal_selection_strategy="final",
         device=None,
-        preloader=None
+        preloader=None,
+        selective=False
     ):
         self.env = env
         self.n_sampled_goal = n_sampled_goal
         self.selection_strategy = goal_selection_strategy
         self.device = device
+        self.selective = selective
 
         camera_dim = obs_space.spaces["observation"]["camera"].shape
         robot_state_dim = obs_space.spaces["observation"]["robot_state"].shape
@@ -130,6 +132,11 @@ class ReplayBuffer:
         self.ep_start_ptr = self.ptr
 
     def end_episode(self):
+        if self.selective and torch.allclose(self.obs2_agoal_buf[self.ptr - 1], self.obs_agoal_buf[self.ep_start_ptr], atol=1e-3):
+            self.size -= (self.ptr - self.ep_start_ptr)
+            self.ptr = self.ep_start_ptr
+            return
+
         self._synthesize_experience()
 
     def _get_current_episode(self):
