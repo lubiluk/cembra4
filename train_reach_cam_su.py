@@ -109,7 +109,7 @@ if __name__ == "__main__":
     ac_kwargs = dict(
         hidden_sizes=[256, 256], activation=nn.ReLU, extractor_module=Extractor
     )
-    rb_kwargs = dict(size=10_000, n_sampled_goal=4, goal_selection_strategy="future")
+    rb_kwargs = dict(size=5_000, n_sampled_goal=4, goal_selection_strategy="future")
 
     logger_kwargs = dict(output_dir=save_path, exp_name=exp_name)
 
@@ -119,7 +119,7 @@ if __name__ == "__main__":
         ac_kwargs=ac_kwargs,
         replay_buffer=replay_buffer_her_cam.ReplayBuffer,
         rb_kwargs=rb_kwargs,
-        max_ep_len=100,
+        max_ep_len=50,
         batch_size=256,
         gamma=0.95,
         lr=0.0003,

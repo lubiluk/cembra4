@@ -110,9 +110,9 @@ if __name__ == "__main__":
         hidden_sizes=[256, 256], activation=nn.ReLU, extractor_module=Extractor
     )
     rb_kwargs = dict(
-        size=50_000,
-        n_sampled_goal=4,
-        goal_selection_strategy="future",
+        size=5_000,
+        n_sampled_goal=1,
+        goal_selection_strategy="final",
         selective=True
     )
 
@@ -131,8 +131,8 @@ if __name__ == "__main__":
         update_after=512,
         update_every=512,
         logger_kwargs=logger_kwargs,
-        use_gpu_buffer=False,
-        use_gpu_computation=False
+        # use_gpu_buffer=False,
+        # use_gpu_computation=False
     )
 
     model.train(steps_per_epoch=1024, epochs=5000)
