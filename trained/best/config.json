@@ -1,0 +1,45 @@
+{
+    "ac_kwargs":	{
+        "activation":	"ReLU",
+        "extractor_module":	"Extractor",
+        "hidden_sizes":	[
+            256,
+            256
+        ]
+    },
+    "actor_critic":	"MLPActorCritic",
+    "batch_size":	256,
+    "best_logger_kwargs":	{
+        "exp_name":	"push_cam_su_selective",
+        "output_dir":	"./data/push_cam_su_selective/best"
+    },
+    "ent_coef":	"auto",
+    "env":	"<PreprocessingWrapper<DoneOnSuccessWrapper<TimeLimit<PandaPushCamEnv<PandaPushCam-v1>>>>>",
+    "exp_name":	"push_cam_su_selective",
+    "gamma":	0.95,
+    "logger_kwargs":	{
+        "exp_name":	"push_cam_su_selective",
+        "output_dir":	"./data/push_cam_su_selective"
+    },
+    "lr":	0.0003,
+    "max_ep_len":	50,
+    "num_test_episodes":	10,
+    "num_updates":	null,
+    "polyak":	0.995,
+    "rb_kwargs":	{
+        "goal_selection_strategy":	"final",
+        "n_sampled_goal":	1,
+        "selective":	true,
+        "size":	50000
+    },
+    "replay_buffer":	"ReplayBuffer",
+    "save_freq":	1,
+    "seed":	0,
+    "self":	"SAC",
+    "start_steps":	10000,
+    "target_entropy":	"auto",
+    "update_after":	512,
+    "update_every":	512,
+    "use_gpu_buffer":	true,
+    "use_gpu_computation":	true
+}

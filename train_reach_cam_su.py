@@ -80,11 +80,11 @@ class Extractor(nn.Module):
         obs_space = env.observation_space.spaces["observation"]["camera"]
 
         self.cnn = nn.Sequential(
-            nn.Conv2d(obs_space.shape[0], 8, kernel_size=8, stride=4, padding=0),
+            nn.Conv2d(obs_space.shape[0], 16, kernel_size=3, stride=2, padding=0),
             nn.ReLU(),
-            nn.Conv2d(8, 16, kernel_size=4, stride=2, padding=0),
+            nn.Conv2d(16, 32, kernel_size=3, stride=2, padding=0),
             nn.ReLU(),
-            nn.Conv2d(16, 16, kernel_size=3, stride=1, padding=0),
+            nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=0),
             nn.ReLU(),
             nn.Flatten(),
         )

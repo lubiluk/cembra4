@@ -34,8 +34,17 @@ def make_env():
     return DoneOnSuccessWrapper(gym.make('FreePandaPush-v1', render=False, object_shape="sphere"))
 
 
+# aktywacje
+# ilość warst i głębokości
+# stride
+# VGG
+# zmniejszyć batch size
+# atencja
+# neuroewolucja wag
+# krytyk na danych z symulatora
+
 def define_model(trial, env):
-    n_layers = trial.suggest_int("n_layers", 1, 4)
+    n_layers = trial.suggest_int("n_layers", 1, 4) 
     layers = [trial.suggest_int("n_units_l{}".format(i), 32, 512) for i in range(n_layers)]
 
 
@@ -52,7 +61,7 @@ def define_model(trial, env):
         max_episode_length=200,
         online_sampling=False,
         buffer_size=1_000_000,
-        batch_size=trial.suggest_int("batch_size", 256, 2048),
+        batch_size=trial.suggest_int("batch_size", 32, 2048),
         learning_rate=trial.suggest_float("lr", 0.0001, 0.1),
         learning_starts=1000,
         gamma=trial.suggest_float("gamma", 0.5, 0.99),
