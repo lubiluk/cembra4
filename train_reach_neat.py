@@ -22,7 +22,7 @@ class PoleBalanceConfig:
     NUM_OUTPUTS = 3
     USE_BIAS = True
 
-    ACTIVATION = "sigmoid"
+    ACTIVATION = "relu"
     SCALE_ACTIVATION = 4.9
 
     FITNESS_THRESHOLD = 100.0
@@ -60,7 +60,7 @@ class PoleBalanceConfig:
         while not done:
             input = torch.Tensor([observation]).to(self.DEVICE)
 
-            pred = phenotype(input).detach().numpy().squeeze()
+            pred = phenotype(input).detach().cpu().numpy().squeeze()
             observation, reward, done, info = env.step(pred)
 
             fitness += reward
@@ -105,7 +105,7 @@ if solution is not None:
         env.render()
         input = torch.Tensor([observation]).to(PoleBalanceConfig.DEVICE)
 
-        pred = phenotype(input).detach().numpy().squeeze()
+        pred = phenotype(input).detach().cpu().numpy().squeeze()
         observation, reward, done, info = env.step(pred)
 
         fitness += reward
