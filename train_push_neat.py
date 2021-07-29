@@ -5,14 +5,12 @@ from neat.phenotype.feed_forward import FeedForwardNet
 from gym.wrappers.flatten_observation import FlattenObservation
 from gym.wrappers.filter_observation import FilterObservation
 from wrappers import DoneOnSuccessWrapper
+from gym.wrappers.time_limit import TimeLimit
 
 def wrap(env):
     return FlattenObservation(
-            FilterObservation(
-                DoneOnSuccessWrapper(env, reward_offset=0),
-                filter_keys=["observation", "desired_goal"],
-            )
-        )
+        DoneOnSuccessWrapper(TimeLimit(env, max_episode_steps=50), reward_offset=0)
+    )
 
 class PoleBalanceConfig:
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -41,10 +39,9 @@ class PoleBalanceConfig:
     # Top percentage of species to be saved before mating
     PERCENTAGE_TO_SAVE = 0.80
 
-
     def fitness_fn(self, genome):
         # OpenAI Gym
-        env = wrap(gym.make("PandaReach-v1", render=False, reward_type="sparse"))
+        env = wrap(gym.make("PandaPush-v1", render=False, reward_type="sparse"))
 
         fitness = 0
         phenotype = FeedForwardNet(genome, self)
@@ -86,12 +83,12 @@ if solution is not None:
     draw_net(
         solution,
         view=True,
-        filename="./images/reach-solution",
+        filename="./images/push-solution",
         show_disabled=True,
     )
 
     # OpenAI Gym
-    env = wrap(gym.make("PandaReach-v1", render=False, reward_type="sparse"))
+    env = wrap(gym.make("PandaPush-v1", render=False, reward_type="sparse"))
     done = False
     observation = env.reset()
 
