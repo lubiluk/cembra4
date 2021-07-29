@@ -9,7 +9,7 @@ from wrappers import DoneOnSuccessWrapper
 def wrap(env):
     return FlattenObservation(
             FilterObservation(
-                DoneOnSuccessWrapper(env, reward_offset=1),
+                DoneOnSuccessWrapper(env, reward_offset=0),
                 filter_keys=["observation", "desired_goal"],
             )
         )
@@ -25,7 +25,7 @@ class PoleBalanceConfig:
     ACTIVATION = "relu"
     SCALE_ACTIVATION = 4.9
 
-    FITNESS_THRESHOLD = 100.0
+    FITNESS_THRESHOLD = 95.0
 
     POPULATION_SIZE = 150
     NUMBER_OF_GENERATIONS = 150
@@ -51,19 +51,22 @@ class PoleBalanceConfig:
     def fitness_fn(self, genome):
         # OpenAI Gym
         env = wrap(gym.make("PandaReach-v1", render=False, reward_type="dense"))
-        done = False
-        observation = env.reset()
 
         fitness = 0
         phenotype = FeedForwardNet(genome, self)
 
-        while not done:
-            input = torch.Tensor([observation]).to(self.DEVICE)
+        for i in range(100):
+            done = False
+            observation = env.reset()
 
-            pred = phenotype(input).detach().cpu().numpy().squeeze()
-            observation, reward, done, info = env.step(pred)
+            while not done:
+                input = torch.Tensor([observation]).to(self.DEVICE)
 
-            fitness += reward
+                pred = phenotype(input).detach().cpu().numpy().squeeze()
+                observation, reward, done, info = env.step(pred)
+
+            fitness += float(info["is_success"])
+
         env.close()
 
         return fitness
@@ -98,7 +101,6 @@ if solution is not None:
     done = False
     observation = env.reset()
 
-    fitness = 0
     phenotype = FeedForwardNet(solution, PoleBalanceConfig)
 
     while not done:
@@ -108,5 +110,4 @@ if solution is not None:
         pred = phenotype(input).detach().cpu().numpy().squeeze()
         observation, reward, done, info = env.step(pred)
 
-        fitness += reward
     env.close()
