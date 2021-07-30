@@ -25,10 +25,10 @@ class PoleBalanceConfig:
     ACTIVATION = "relu"
     SCALE_ACTIVATION = 4.9
 
-    FITNESS_THRESHOLD = 95.0
+    FITNESS_THRESHOLD = 9.5
 
     POPULATION_SIZE = 150
-    NUMBER_OF_GENERATIONS = 15000
+    NUMBER_OF_GENERATIONS = 1_000_000
     SPECIATION_THRESHOLD = 3.0
 
     CONNECTION_MUTATION_RATE = 0.80
@@ -49,7 +49,7 @@ class PoleBalanceConfig:
         fitness = 0
         phenotype = FeedForwardNet(genome, self)
 
-        for i in range(100):
+        for i in range(10):
             done = False
             observation = env.reset()
 
