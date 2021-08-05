@@ -25,7 +25,7 @@ class PoleBalanceConfig:
     ACTIVATION = "tanh"
     SCALE_ACTIVATION = 1.0
 
-    FITNESS_THRESHOLD = 9.0
+    FITNESS_THRESHOLD = 990.0
 
     POPULATION_SIZE = 150
     NUMBER_OF_GENERATIONS = 1_000_000
@@ -46,7 +46,7 @@ class PoleBalanceConfig:
         # OpenAI Gym
         env = wrap(gym.make("PandaReach-v1", render=False, reward_type="dense"))
 
-        fitness = 0
+        fitness = 1000
         phenotype = FeedForwardNet(genome, self)
 
         for i in range(10):
@@ -59,9 +59,6 @@ class PoleBalanceConfig:
                 pred = phenotype(input).detach().cpu().numpy().squeeze()
                 observation, reward, done, info = env.step(pred)
                 fitness += reward
-
-                if info["is_success"]:
-                    fitness += 1.0
 
         env.close()
 
