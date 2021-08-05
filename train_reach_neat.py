@@ -25,7 +25,7 @@ class PoleBalanceConfig:
     ACTIVATION = "tanh"
     SCALE_ACTIVATION = 1.0
 
-    FITNESS_THRESHOLD = -1.0
+    FITNESS_THRESHOLD = 9.0
 
     POPULATION_SIZE = 150
     NUMBER_OF_GENERATIONS = 1_000_000
@@ -60,6 +60,9 @@ class PoleBalanceConfig:
                 observation, reward, done, info = env.step(pred)
                 fitness += reward
 
+                if info["is_success"]:
+                    fitness += 1.0
+
         env.close()
 
         return fitness
@@ -90,17 +93,20 @@ if solution is not None:
     )
 
     # OpenAI Gym
-    env = wrap(gym.make("PandaReach-v1", render=False, reward_type="sparse"))
+    env = wrap(gym.make("PandaReach-v1", render=True, reward_type="dense"))
     done = False
     observation = env.reset()
 
     phenotype = FeedForwardNet(solution, PoleBalanceConfig)
 
-    while not done:
+    while True:
         env.render()
         input = torch.Tensor([observation]).to(PoleBalanceConfig.DEVICE)
 
         pred = phenotype(input).detach().cpu().numpy().squeeze()
         observation, reward, done, info = env.step(pred)
+
+        if done:
+            observation = env.reset()
 
     env.close()
