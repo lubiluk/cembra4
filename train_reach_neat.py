@@ -22,10 +22,10 @@ class PoleBalanceConfig:
     NUM_OUTPUTS = 3
     USE_BIAS = True
 
-    ACTIVATION = "relu"
-    SCALE_ACTIVATION = 4.9
+    ACTIVATION = "tanh"
+    SCALE_ACTIVATION = 1.0
 
-    FITNESS_THRESHOLD = 9.0
+    FITNESS_THRESHOLD = -1.0
 
     POPULATION_SIZE = 150
     NUMBER_OF_GENERATIONS = 1_000_000
@@ -44,7 +44,7 @@ class PoleBalanceConfig:
 
     def fitness_fn(self, genome):
         # OpenAI Gym
-        env = wrap(gym.make("PandaReach-v1", render=False, reward_type="sparse"))
+        env = wrap(gym.make("PandaReach-v1", render=False, reward_type="dense"))
 
         fitness = 0
         phenotype = FeedForwardNet(genome, self)
@@ -58,8 +58,7 @@ class PoleBalanceConfig:
 
                 pred = phenotype(input).detach().cpu().numpy().squeeze()
                 observation, reward, done, info = env.step(pred)
-
-            fitness += float(info["is_success"])
+                fitness += reward
 
         env.close()
 
