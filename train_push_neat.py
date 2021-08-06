@@ -16,14 +16,14 @@ class PoleBalanceConfig:
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     VERBOSE = True
 
-    NUM_INPUTS = 4
+    NUM_INPUTS = 24
     NUM_OUTPUTS = 3
     USE_BIAS = True
 
     ACTIVATION = "relu"
-    SCALE_ACTIVATION = 4.9
+    SCALE_ACTIVATION = 1.0
 
-    FITNESS_THRESHOLD = 9.0
+    FITNESS_THRESHOLD = 195.0
 
     POPULATION_SIZE = 150
     NUMBER_OF_GENERATIONS = 1_000_000
@@ -41,9 +41,9 @@ class PoleBalanceConfig:
 
     def fitness_fn(self, genome):
         # OpenAI Gym
-        env = wrap(gym.make("PandaPush-v1", render=False, reward_type="sparse"))
+        env = wrap(gym.make("PandaPush-v1", render=False, reward_type="dense"))
 
-        fitness = 0
+        fitness = 200
         phenotype = FeedForwardNet(genome, self)
 
         for i in range(10):
@@ -55,8 +55,7 @@ class PoleBalanceConfig:
 
                 pred = phenotype(input).detach().cpu().numpy().squeeze()
                 observation, reward, done, info = env.step(pred)
-
-            fitness += float(info["is_success"])
+                fitness += reward
 
         env.close()
 
@@ -88,11 +87,13 @@ if solution is not None:
     )
 
     # OpenAI Gym
-    env = wrap(gym.make("PandaPush-v1", render=False, reward_type="sparse"))
+    env = wrap(gym.make("PandaPush-v1", render=False, reward_type="dense"))
     done = False
     observation = env.reset()
 
     phenotype = FeedForwardNet(solution, PoleBalanceConfig)
+
+    torch.save(phenotype, "data/push_neat")
 
     while not done:
         env.render()

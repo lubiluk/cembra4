@@ -18,14 +18,14 @@ class PoleBalanceConfig:
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     VERBOSE = True
 
-    NUM_INPUTS = 4
+    NUM_INPUTS = 9
     NUM_OUTPUTS = 3
     USE_BIAS = True
 
     ACTIVATION = "tanh"
     SCALE_ACTIVATION = 1.0
 
-    FITNESS_THRESHOLD = 990.0
+    FITNESS_THRESHOLD = 195.0
 
     POPULATION_SIZE = 150
     NUMBER_OF_GENERATIONS = 1_000_000
@@ -46,7 +46,7 @@ class PoleBalanceConfig:
         # OpenAI Gym
         env = wrap(gym.make("PandaReach-v1", render=False, reward_type="dense"))
 
-        fitness = 1000
+        fitness = 200
         phenotype = FeedForwardNet(genome, self)
 
         for i in range(10):
@@ -96,7 +96,9 @@ if solution is not None:
 
     phenotype = FeedForwardNet(solution, PoleBalanceConfig)
 
-    while True:
+    torch.save(phenotype, "data/reach_neat")
+
+    while not done:
         env.render()
         input = torch.Tensor([observation]).to(PoleBalanceConfig.DEVICE)
 
