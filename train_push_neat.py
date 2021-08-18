@@ -46,7 +46,7 @@ class PoleBalanceConfig:
         fitness = 200
         phenotype = FeedForwardNet(genome, self)
 
-        for i in range(10):
+        for i in range(20):
             done = False
             observation = env.reset()
 
@@ -61,6 +61,11 @@ class PoleBalanceConfig:
 
         return fitness
 
+
+# kiedy dochodzi do 50%
+# jaka sieć
+# narzucić ilość warst i mutować same wagi
+# zapisywanie stanu i kontynuacja
 
 import logging
 

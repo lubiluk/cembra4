@@ -22,7 +22,7 @@ class PoleBalanceConfig:
     NUM_OUTPUTS = 3
     USE_BIAS = True
 
-    ACTIVATION = "tanh"
+    ACTIVATION = "relu"
     SCALE_ACTIVATION = 1.0
 
     FITNESS_THRESHOLD = 195.0
@@ -45,6 +45,7 @@ class PoleBalanceConfig:
     def fitness_fn(self, genome):
         # OpenAI Gym
         env = wrap(gym.make("PandaReach-v1", render=False, reward_type="dense"))
+        act_limit = env.action_space.high[0]
 
         fitness = 200
         phenotype = FeedForwardNet(genome, self)
@@ -56,8 +57,14 @@ class PoleBalanceConfig:
             while not done:
                 input = torch.Tensor([observation]).to(self.DEVICE)
 
-                pred = phenotype(input).detach().cpu().numpy().squeeze()
-                observation, reward, done, info = env.step(pred)
+                pred = phenotype(input)
+
+                # scaling
+                pi_action = torch.tanh(pred)
+                pi_action = act_limit * pi_action
+                pi_action = pi_action.detach().cpu().numpy().squeeze()
+
+                observation, reward, done, info = env.step(pi_action)
                 fitness += reward
 
         env.close()
